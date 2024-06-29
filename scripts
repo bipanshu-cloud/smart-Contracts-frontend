@@ -1,40 +1,62 @@
-const hre = require("hardhat");
 
-async function main() {
-    const initBalance = 1;
-    const Assessment = await hre.ethers.getContractFactory("Mytoken");
-    const assessment = await Assessment.deploy(ethers.utils.parseEther("1.0"));
-    await assessment.deployed();
+const { useState, useEffect } = require('react');
+const { ethers } = require('ethers');
 
-    assessment.DisplayAddress();
+const contractAddress = '0xDA0bab807633f07f013f94DD0E6A4F96F8742B53'; // Replace with your contract address
+const abi = [
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "data1",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "data2",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }
+];
 
-    console.log(`A contract with balance of ${initBalance} eth deployed to ${assessment.address}`);
+const ContractViewer = () => {
+    const [data1, setData1] = useState(0);
+    const [data2, setData2] = useState(0);
 
-    assessment.on("showAddress", (owner) => {
-        console.log(`msg.sender is : ${owner}`);
-    });
+    useEffect(() => {
+        const fetchContractData = async () => {
+            try {
+                // Connect to the network
+                const provider = new ethers.providers.JsonRpcProvider('YOUR_RPC_URL'); // Replace with your RPC URL
+                const contract = new ethers.Contract(contractAddress, abi, provider);
 
-    assessment.on("deposite", (deposit_val, Balance) => {
-        console.log(`New deposit: ${deposit_val} new Balance is : ${Balance} ETH`);
-    });
+                // Fetch data from the contract
+                const result1 = await contract.data1();
+                const result2 = await contract.data2();
 
-    assessment.on("withdraw", (withdraw_val, Balance) => {
-        console.log(`New withdraw: ${withdraw_val} new Balance is : ${Balance} ETH`);
-    });
+                setData1(result1.toString());
+                setData2(result2.toString());
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
 
-    assessment.on("redeem", (amount) => {
-        console.log(`Redeemed amount: ${amount} ETH`);
-    });
+        fetchContractData();
+    }, []);
 
-    assessment.on("transfer", (from, to, amount) => {
-        console.log(`Transferred ${amount} ETH from ${from} to ${to}`);
-    });
+    return (
+        `<div>
+            <h1>Contract Data Viewer</h1>
+            <p>Data 1: ${data1}</p>
+            <p>Data 2: ${data2}</p>
+        </div>`
+    );
+};
 
-    // Call the "redeem" function
-    await assessment.Redeem();
-}
+module.exports = ContractViewer;
 
-main().catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-});
