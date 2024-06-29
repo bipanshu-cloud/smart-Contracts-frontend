@@ -1,31 +1,106 @@
-Interact your smart-contract with frontend and connect it to MetaMask Wallet
+Function Frontend
+Creating a frontend for interacting with a smart contract is a common task in decentralized application  development.
 
-In this section we will be connecting our smart contract with the frontend and a METAMASK wallet to deposite or withdraw Ethers.
+DESCRIPTION
+Developing a frontend to interact with a smart contract is a fundamental task in decentralized application  development. This process involves 
+a few key concepts and steps that bridge the gap between blockchain technology and user-friendly interfaces.For the frontend, we often use React,
+a popular JavaScript library for building user interfaces. React's component-based architecture and its ease of integration with web3 libraries 
+make it a suitable choice for dApp development
 
-Description
-It contains 3 Files namely deploy.js, index.js and SmartContract.sol in the 3 folders Scripts, Pages and Contracts respectively.
+GETTING STARTED
+CODE
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-Getting Started
+contract SimpleContract {
+    uint256 public data1;
+    uint256 public data2;
+    
+    function setData1(uint256 _data) public {
+        data1 = _data;
+    }
+    
+    function setData2(uint256 _data) public {
+        data2 = _data;
+    }
+}
 
-Executing program for frontend and smart contract
-copy and paste the index.js, SmartContract.sol and deploy.js from the repository into your gitpod website.
-Remember index.js contains the frontend code.
-Open two additional terminals in your gitpod
-In the second terminal type: npx hardhat node
-In the third terminal, type: npx hardhat run --network localhost scripts/deploy.js
-Back in the first terminal, type npm run dev to launch the front-end. After this, the project will be running on your localhost. Typically at http://localhost:3000/
-wallet setup
-To interact with the smart contract, we need to set up a network with the MetaMask wallet.
 
-Click on the MetaMask extension and then click on the top right button -> settings.
-Click on "Add a Network."
-Click on "Add a Network Manually."
-Give the Network name (whatever you want).
-Set the Chain ID to 31337.
-Set the Currency symbol. Now, set the MetaMask wallet network to the newly created network.
-To set up an account, you have to import the account's private key, which you can find in the second terminal where we executed the command npx hardhat node. After that, you can see there are many account numbers with private keys written in the terminal.Take any account's private key to import it to your Metamask Wallet.And Now your imported account is coonect to our METAMASK wallet and hence we can transfer our ethers.
 
-Now open http://localhost:3000/ again and now you can interact with your frontend and METAMASK wallet and transfer tokens accordingly.
+JAC// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-License
-This project is licensed under the MIT License - see the LICENSE.md file for details.
+contract SimpleContract {
+    uint256 public data1;
+    uint256 public data2;
+    
+    function setData1(uint256 _data) public {
+        data1 = _data;
+    }
+    
+    function setData2(uint256 _data) public {
+        data2 = _data;
+    }
+}
+
+
+JAVASCRIPT
+
+async function fetchContractData() {
+    const contractAddress = '0xDA0bab807633f07f013f94DD0E6A4F96F8742B53'; // Replace with your contract address
+    const abi = [
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "data1",
+            "outputs": [{"name": "", "type": "uint256"}],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "data2",
+            "outputs": [{"name": "", "type": "uint256"}],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ];
+
+    // Check if the browser has injected the Ethereum provider (MetaMask)
+    if (typeof window.ethereum !== 'undefined' || (typeof window.web3 !== 'undefined')) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+        try {
+            console.log('Requesting account access...');
+            // Request account access if needed
+            await provider.send("eth_requestAccounts", []);
+            console.log('Account access granted.');
+
+            const contract = new ethers.Contract(contractAddress, abi, provider);
+
+            console.log('Fetching data from contract...');
+            // Fetch data from the contract
+            const result1 = await contract.data1();
+            const result2 = await contract.data2();
+
+            console.log('Data fetched:', result1.toString(), result2.toString());
+
+            document.getElementById('data1').innerText = result1.toString();
+            document.getElementById('data2').innerText = result2.toString();
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            document.getElementById('data1').innerText = 'Error';
+            document.getElementById('data2').innerText = 'Error';
+        }
+    } else {
+        console.error('No Ethereum provider found. Install MetaMask.');
+        document.getElementById('data1').innerText = 'No provider found';
+        document.getElementById('data2').innerText = 'No provider found';
+    }
+}
+
+window.onload = fetchContractData;
+
